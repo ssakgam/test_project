@@ -1,0 +1,67 @@
+package hello.bootProj.controller;
+
+import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.ResponseBody;
+
+@Controller
+public class HelloController {
+
+    @GetMapping("hello")
+    public String hello(Model model) {
+        model.addAttribute("data", "spring!!");
+        return "hello"; // 컨트롤러에서 리턴값으로 문자를 반환하면 뷰 리졸버에서 리턴값으로 된 html 호출.
+    }
+
+
+    //@RequestParam을 생략해도 됨
+    //String name 만으로도 받을 수도 있음. 시스템에 따라서 자바 컴파일러 최적화 옵션을 적용할 수 있는데,
+    // 그렇게 되면 컴파일 시점에 name 이라는 변수가 사라지기 때문에, 이 경우 받을 수가 없다.
+    //그래서 다음과 같이 되어버릴 수 있다.
+    //@RequestParam("name") String name ->컴파일 후 @RequestParam("name") String x01
+    //이런 문제 때문에 명시적으로 다음과 같이 작성해준다. @RequestParam("name")
+    @GetMapping("hello-mvc")
+    public String helloMvc(@RequestParam(value = "name") String name, Model model) {
+        model.addAttribute("name", name);
+        return "hello-template";
+    }
+
+    @GetMapping("hello-string")
+    @ResponseBody
+    //말그대로 string 그대로 표시된다(hellospring!!!)
+    public String helloString(@RequestParam("name") String name){
+
+        return "hello" + name;  //"hello spring"
+    }
+
+    @GetMapping("hello-api")
+    @ResponseBody
+    // respose를 위해 객체로 넘겨주면  JSON(key $ value) 방식으로 표시가 된다 {"name":"spring!!!"}
+    public Hello helloApi(@RequestParam("name") String name) {
+        Hello hello = new Hello();
+        hello.setName(name);
+        return hello;
+    }
+    //HelloController.Hello 로 하면 호출가능
+    static class Hello{
+        private String name;
+        public String getName() {
+            return name;
+        }
+        public void setName(String name) {
+            this.name = name;
+        }
+    }
+    /*
+     자바 빈 규약
+    1. 기본 생성자를 반드시 가지고 있어야 한다.
+    2. 빈이 패키지화 되어 있어야한다.
+    3. 멤버 변수의 접근자는 private 으로 선언한다( getter setter  사용위해)
+    4. 멤버 변수에 접근하기 위한 public 접근자인 getter/setter 메서드가 존재해야 한다. (property 접근 방식이라고 함)
+     */
+
+    //API방식은 view resolver 가 아닌 HttpMessageConverter 가 처리한다
+
+}
